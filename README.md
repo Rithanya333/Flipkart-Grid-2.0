@@ -144,23 +144,6 @@ Rather than using raw variables directly, the framework transforms each source i
 
 ## Stage 2: Feature Engineering
 
-Feature engineering forms the foundation of the entire solution.
-
-Three major feature groups are generated:
-
-### Temporal Features
-
-Temporal features capture recurring traffic patterns such as:
-
-- Hourly seasonality
-- Daily seasonality
-- Weekly seasonality
-- Monthly patterns
-
-To preserve cyclic continuity, Fourier harmonic encodings are used instead of raw timestamps.
-
-## Stage 2: Feature Engineering
-
 Feature engineering constitutes the most important component of the forecasting pipeline. The objective is to transform raw observations into representations that expose latent temporal, spatial, and historical traffic dynamics.
 
 The generated features can be broadly categorized into temporal, spatial, and historical representations.
@@ -175,21 +158,15 @@ To preserve cyclic relationships, Fourier harmonic encodings are employed.
 
 For a periodic signal with period \(P\), the \(k\)-th harmonic representation is defined as
 
-$
-\phi_{\sin}^{(k)}(t)
-=
-\sin\!\left(
-\frac{2\pi k t}{P}
-\right)
-$
+\[
+\phi_{\sin}^{(k)}(t) = \sin\!\left(\frac{2\pi k t}{P}\right), \quad k = 1,2,3,\dots
+\]
 
-$$
 \phi_{\cos}^{(k)}(t)
 =
 \cos\!\left(
 \frac{2\pi k t}{P}
 \right)
-$$
 
 where
 
