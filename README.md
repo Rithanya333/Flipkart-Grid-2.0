@@ -165,10 +165,22 @@ $$
 $$
 \phi_{\cos}^{(k)}(t) = \cos\!\left(\frac{2\pi k t}{P}\right)$$
 
-where
+## Temporal Features
+
+Traffic demand exhibits strong periodic patterns. To capture these cycles, harmonic encodings are used:
+
+$$
+\phi_{\sin}^{(k)}(t) = \sin\!\left(\frac{2\pi k t}{P}\right), \quad k = 1,2,3,\dots
+$$
+
+$$
+\phi_{\cos}^{(k)}(t) = \cos\!\left(\frac{2\pi k t}{P}\right)
+$$
+
+where:
 
 | Symbol | Description |
-|----------|----------|
+|--------|-------------|
 | \(t\) | Temporal index |
 | \(P\) | Length of the cycle period |
 | \(k\) | Harmonic order |
@@ -180,35 +192,19 @@ The resulting feature space preserves periodic continuity and enables the model 
 Examples include:
 
 $$
-Hour_{\sin}
-=
-\sin\!\left(
-\frac{2\pi \cdot Hour}{24}
-\right)
+Hour_{\sin} = \sin\!\left(\frac{2\pi \cdot Hour}{24}\right)
 $$
 
 $$
-Hour_{\cos}
-=
-\cos\!\left(
-\frac{2\pi \cdot Hour}{24}
-\right)
+Hour_{\cos} = \cos\!\left(\frac{2\pi \cdot Hour}{24}\right)
 $$
 
 $$
-DayOfWeek_{\sin}
-=
-\sin\!\left(
-\frac{2\pi \cdot DayOfWeek}{7}
-\right)
+DayOfWeek_{\sin} = \sin\!\left(\frac{2\pi \cdot DayOfWeek}{7}\right)
 $$
 
 $$
-DayOfWeek_{\cos}
-=
-\cos\!\left(
-\frac{2\pi \cdot DayOfWeek}{7}
-\right)
+DayOfWeek_{\cos} = \cos\!\left(\frac{2\pi \cdot DayOfWeek}{7}\right)
 $$
 
 ---
@@ -220,9 +216,7 @@ Traffic demand is strongly influenced by geographic location. Urban centers, res
 To capture these spatial dependencies, geohashes are first decoded into latitude-longitude coordinates
 
 $$
-g_i
-\longrightarrow
-(lat_i, lon_i)
+g_i \longrightarrow (lat_i, lon_i)
 $$
 
 where \(g_i\) denotes the geospatial identifier associated with observation \(i\).
@@ -232,18 +226,13 @@ Subsequently, K-Means clustering is employed to identify regions exhibiting simi
 The clustering objective is formulated as
 
 $$
-\min_{\{\mathbf{c}_k\}_{k=1}^{K}}
-\sum_{i=1}^{N}
-\min_{k}
-\left\|
-\mathbf{x}_i-\mathbf{c}_k
-\right\|_2^2
+\min_{\{\mathbf{c}_k\}_{k=1}^{K}} \sum_{i=1}^{N} \min_{k} \left\| \mathbf{x}_i - \mathbf{c}_k \right\|_2^2
 $$
 
 where
 
 | Symbol | Description |
-|----------|----------|
+|--------|-------------|
 | \(N\) | Number of observations |
 | \(K\) | Number of clusters |
 | \(\mathbf{x}_i\) | Spatial coordinate vector |
@@ -263,15 +252,13 @@ To capture this temporal memory, lag-based and rolling statistical features are 
 A lag feature with offset \(h\) is defined as
 
 $$
-Lag_t^{(h)}
-=
-y_{t-h}
+Lag_t^{(h)} = y_{t-h}
 $$
 
 where
 
 | Symbol | Description |
-|----------|----------|
+|--------|-------------|
 | \(y_t\) | Traffic demand at time \(t\) |
 | \(h\) | Lag horizon |
 | \(Lag_t^{(h)}\) | Historical demand observation |
@@ -279,15 +266,11 @@ where
 Examples include
 
 $$
-Lag_t^{(24)}
-=
-y_{t-24}
+Lag_t^{(24)} = y_{t-24}
 $$
 
 $$
-Lag_t^{(168)}
-=
-y_{t-168}
+Lag_t^{(168)} = y_{t-168}
 $$
 
 which capture daily and weekly seasonality respectively.
@@ -295,11 +278,7 @@ which capture daily and weekly seasonality respectively.
 To characterize local trends, rolling mean features are computed as
 
 $$
-RM_t^{(w)}
-=
-\frac{1}{w}
-\sum_{i=1}^{w}
-y_{t-i}
+RM_t^{(w)} = \frac{1}{w} \sum_{i=1}^{w} y_{t-i}
 $$
 
 where \(w\) denotes the rolling window size.
@@ -307,25 +286,13 @@ where \(w\) denotes the rolling window size.
 Demand volatility is represented through rolling variance
 
 $$
-RV_t^{(w)}
-=
-\frac{1}{w}
-\sum_{i=1}^{w}
-\left(
-y_{t-i}
--
-RM_t^{(w)}
-\right)^2
+RV_t^{(w)} = \frac{1}{w} \sum_{i=1}^{w} \left( y_{t-i} - RM_t^{(w)} \right)^2
 $$
 
 and rolling standard deviation
 
 $$
-RSD_t^{(w)}
-=
-\sqrt{
-RV_t^{(w)}
-}
+RSD_t^{(w)} = \sqrt{RV_t^{(w)}}
 $$
 
 Together, these features provide the model with information regarding demand momentum, local trends, and traffic volatility.
@@ -341,21 +308,13 @@ To address this challenge, smoothed target encoding is employed.
 For a category \(c\), the encoded representation is defined as
 
 $$
-TE(c)
-=
-\frac{
-n_c \mu_c
-+
-\alpha \mu_g
-}{
-n_c+\alpha
-}
+TE(c) = \frac{n_c \mu_c + \alpha \mu_g}{n_c + \alpha}
 $$
 
 where
 
 | Symbol | Description |
-|----------|----------|
+|--------|-------------|
 | \(n_c\) | Number of observations in category \(c\) |
 | \(\mu_c\) | Mean target value of category \(c\) |
 | \(\mu_g\) | Global target mean |
@@ -374,17 +333,13 @@ Multiple gradient-boosting and tree-based learners are trained independently.
 The prediction of a boosting ensemble can be represented as
 
 $$
-\hat{y}_i
-=
-\sum_{m=1}^{M}
-\eta \,
-h_m(\mathbf{x}_i)
+\hat{y}_i = \sum_{m=1}^{M} \eta \, h_m(\mathbf{x}_i)
 $$
 
 where
 
 | Symbol | Description |
-|----------|----------|
+|--------|-------------|
 | \(\hat y_i\) | Predicted demand |
 | \(M\) | Number of boosting rounds |
 | \(\eta\) | Learning rate |
@@ -402,34 +357,25 @@ The final prediction is generated through weighted model aggregation.
 Given \(K\) base learners, the ensemble prediction is defined as
 
 $$
-\hat{y}_i^{ensemble}
-=
-\sum_{j=1}^{K}
-w_j
-\hat{y}_i^{(j)}
+\hat{y}_i^{ensemble} = \sum_{j=1}^{K} w_j \hat{y}_i^{(j)}
 $$
 
 subject to
 
 $$
-\sum_{j=1}^{K}
-w_j
-=
-1
+\sum_{j=1}^{K} w_j = 1
 $$
 
 and
 
 $$
-w_j \ge 0,
-\qquad
-j=1,\ldots,K.
+w_j \ge 0, \qquad j=1,\ldots,K.
 $$
 
 Here,
 
 | Symbol | Description |
-|----------|----------|
+|--------|-------------|
 | \(w_j\) | Weight assigned to model \(j\) |
 | \(\hat y_i^{(j)}\) | Prediction from model \(j\) |
 | \(K\) | Number of base learners |
@@ -445,13 +391,7 @@ Although ensemble models achieve high predictive accuracy, the distribution of p
 To correct this discrepancy, a calibration factor is introduced
 
 $$
-CF
-=
-\frac{
-\mu_{\text{expected}}
-}{
-\mu_{\text{OOF}}
-}
+CF = \frac{\mu_{\text{expected}}}{\mu_{\text{OOF}}}
 $$
 
 where
@@ -462,16 +402,7 @@ where
 The calibrated prediction is computed as
 
 $$
-\hat y_i^{cal}
-=
-\operatorname{clip}
-\left(
-\hat y_i^{ensemble}
-\times CF
-\times 1.01,
-0,
-1
-\right)
+\hat y_i^{cal} = \operatorname{clip} \left( \hat y_i^{ensemble} \times CF \times 1.01, \; 0, \; 1 \right)
 $$
 
 ensuring that predictions remain within the valid target range.
@@ -483,38 +414,18 @@ ensuring that predictions remain within the valid target range.
 Model performance is evaluated using the coefficient of determination \(R^2\)
 
 $$
-R^2
-=
-1
--
-\frac{
-\sum_{i=1}^{N}
-\left(
-y_i-\hat y_i
-\right)^2
-}{
-\sum_{i=1}^{N}
-\left(
-y_i-\bar y
-\right)^2
-}
+R^2 = 1 - \frac{ \sum_{i=1}^{N} \left( y_i - \hat y_i \right)^2 }{ \sum_{i=1}^{N} \left( y_i - \bar y \right)^2 }
 $$
 
 where
 
 $$
-\bar y
-=
-\frac{1}{N}
-\sum_{i=1}^{N}
-y_i
+\bar y = \frac{1}{N} \sum_{i=1}^{N} y_i
 $$
 
 denotes the sample mean of the target variable.
 
 An \(R^2\) value closer to 1 indicates superior predictive performance and stronger explanatory power of the forecasting model.
-
----
 
 ## Experimental Results
 
